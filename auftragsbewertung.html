@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auftragsbewertung | Clean Service Scaramuzzo AG</title>
+<style>
+/* =====================================================================
+   Clean Service Scaramuzzo AG — Layout-Standard
+   Übernommen aus ReportingPFS und PFS Trend-Dashboard.
+   Türkis 2BB6B7, Verdana, Sidebar in Dunkelpetrol, Karten mit Türkis-Oberkante.
+   Einbinden: <link rel="stylesheet" href="clean-service-layout.css">
+   ===================================================================== */
+
+:root{
+  --primary:#2BB6B7;        /* Hauptfarbe CI, RGB 43/182/183 */
+  --primary-dark:#1D8384;
+  --primary-deep:#0E4344;   /* Sidebar */
+  --primary-light:#EAF6F6;
+  --ink:#16292A;
+  --ink-soft:#5E7273;
+  --ink-faint:#8B9C9D;
+  --border:#E3ECEC;
+  --bg:#FBFCFC;
+  --white:#FFFFFF;
+  --pos:#2E9E5B;
+  --neg:#C1503D;
+  --warn:#C98A1B;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  font-family:Verdana, Geneva, sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  display:flex;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+h1,h2,h3,p{ margin:0; }
+a{ color:var(--primary-dark); }
+
+/* ============ Sidebar ============ */
+.sidebar{
+  width:228px;
+  background:var(--primary-deep);
+  color:#fff;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+}
+.sidebar .brand{ padding:26px 22px 20px 22px; }
+.sidebar .brand-name{ font-size:14px; font-weight:bold; line-height:1.35; }
+.sidebar .brand small{
+  display:block; font-weight:normal;
+  color:rgba(255,255,255,.6); font-size:11px; margin-top:5px;
+}
+.sidebar nav{ padding:0 10px; }
+.sidebar nav button{
+  display:block; width:100%; text-align:left;
+  padding:9px 12px; margin-bottom:2px;
+  background:none; border:0; cursor:pointer;
+  color:rgba(255,255,255,.75);
+  font-family:inherit; font-size:13px;
+  border-radius:4px;
+}
+.sidebar nav button:hover{ background:rgba(255,255,255,.07); color:#fff; }
+.sidebar nav button.active{ background:rgba(255,255,255,.1); color:#fff; }
+
+.sidebar-list{
+  flex:1; display:flex; flex-direction:column; min-height:0;
+  margin-top:6px; padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.sidebar-list-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0 22px 10px 22px;
+  font-size:11.5px; color:rgba(255,255,255,.55);
+}
+.sidebar-list-head button{
+  background:none; border:1px solid rgba(255,255,255,.3);
+  color:rgba(255,255,255,.85);
+  width:20px; height:20px; border-radius:4px;
+  font-size:13px; line-height:1; cursor:pointer;
+}
+.sidebar-list-head button:hover{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.5); }
+.sidebar-item{
+  display:flex; justify-content:space-between; align-items:baseline; gap:8px;
+  padding:7px 22px;
+  font-size:12.5px; color:rgba(255,255,255,.8);
+  cursor:pointer; border-left:2px solid transparent;
+}
+.sidebar-item:hover{ background:rgba(255,255,255,.06); border-left-color:var(--primary); color:#fff; }
+.sidebar-item.active{ background:rgba(255,255,255,.1); border-left-color:var(--primary); color:#fff; }
+.sidebar-item .meta{ font-size:11px; color:rgba(255,255,255,.5); white-space:nowrap; }
+.sidebar-item .meta.neg{ color:#E8A599; }
+.sidebar-empty{ padding:8px 22px; font-size:11.5px; color:rgba(255,255,255,.5); }
+.sidebar-footer{
+  margin-top:auto; padding:16px 22px;
+  font-size:10.5px; color:rgba(255,255,255,.4);
+  border-top:1px solid rgba(255,255,255,.1);
+}
+
+/* ============ Hauptbereich ============ */
+main{ flex:1; padding:36px 40px; max-width:1180px; }
+
+header.page-head{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  flex-wrap:wrap; gap:16px;
+  margin-bottom:28px; padding-bottom:18px;
+  border-bottom:1px solid var(--border);
+}
+header.page-head h1{ font-size:23px; font-weight:bold; letter-spacing:-.01em; margin-bottom:4px; }
+header.page-head p{ color:var(--ink-soft); font-size:12.5px; }
+.toolbar{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+/* ============ Buttons ============ */
+.btn{
+  background:none; color:var(--ink-soft); border:none;
+  padding:8px 12px; border-radius:4px;
+  font-family:inherit; font-size:12px; cursor:pointer;
+}
+.btn:hover{ background:var(--primary-light); color:var(--primary-deep); }
+.btn.primary-action{ background:var(--primary); color:#fff; padding:9px 18px; font-weight:bold; }
+.btn.primary-action:hover{ background:var(--primary-dark); color:#fff; }
+.btn.secondary{ background:var(--white); color:var(--primary-dark); border:1px solid var(--primary); padding:8px 14px; }
+.btn.secondary:hover{ background:var(--primary-light); }
+.btn.danger{ background:var(--neg); color:#fff; padding:9px 16px; font-weight:bold; }
+.btn.danger:hover{ background:#A63F2E; color:#fff; }
+.btn.small{ padding:4px 8px; font-size:11px; }
+.btn:disabled{ opacity:.45; cursor:not-allowed; }
+.btn:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* ============ Kennzahlen ============ */
+.kpi-row{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+  gap:14px; margin-bottom:24px;
+}
+.kpi{
+  background:var(--white); border:1px solid var(--border);
+  border-top:3px solid var(--primary); border-radius:4px;
+  padding:14px 16px;
+}
+.kpi .label{ font-size:11px; color:var(--ink-soft); margin-bottom:6px; }
+.kpi .value{ font-size:20px; font-weight:bold; }
+.kpi .value.pos{ color:var(--pos); }
+.kpi .value.neg{ color:var(--neg); }
+.kpi .value .unit{ font-size:12px; font-weight:normal; color:var(--ink-soft); margin-left:3px; }
+.kpi .sub{ font-size:10.5px; color:var(--ink-soft); margin-top:4px; }
+
+/* ============ Karten ============ */
+.card{
+  background:var(--white); border:1px solid var(--border);
+  border-radius:6px; padding:20px 22px; margin-bottom:18px;
+}
+.card h2{ font-size:14.5px; font-weight:bold; margin-bottom:3px; }
+.card .desc{ font-size:11.5px; color:var(--ink-soft); margin-bottom:14px; }
+.card-head{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; flex-wrap:wrap; margin-bottom:14px;
+}
+.card-head h2{ margin-bottom:0; }
+.card.primary{ border-top:3px solid var(--primary-dark); }
+.card.flush{ padding:0; }
+.card.flush .card-head{ padding:18px 22px 0; }
+
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.grid-sidebar{ display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:18px; align-items:start; }
+.stack > * + *{ margin-top:14px; }
+.row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* ============ Stundenband ============ */
+.band{ margin-bottom:14px; }
+.band:last-child{ margin-bottom:0; }
+.band-head{
+  display:flex; justify-content:space-between; align-items:baseline;
+  gap:12px; margin-bottom:5px; font-size:12px;
+}
+.band-head .name{ font-weight:bold; }
+.band-head .figures{ color:var(--ink-soft); }
+.band-head .figures b{ color:var(--ink); }
+.band-track{
+  position:relative; height:12px;
+  background:var(--primary-light);
+  border:1px solid var(--border); border-radius:3px;
+  overflow:hidden;
+}
+.band-fill{ position:absolute; top:0; bottom:0; left:0; background:var(--primary); }
+.band-fill.warn{ background:var(--warn); }
+.band-fill.alert{ background:var(--neg); }
+.band-over{
+  position:absolute; top:0; bottom:0;
+  background:repeating-linear-gradient(135deg, var(--neg) 0 5px, #D97361 5px 10px);
+}
+.band-mark{ position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--ink); }
+.band-legend{ margin-top:4px; font-size:10.5px; color:var(--ink-soft); }
+.band.inline .band-head,
+.band.inline .band-legend{ display:none; }
+.band.inline{ margin:0; }
+.band.inline .band-track{ height:8px; }
+
+/* ============ Tabellen ============ */
+.table-wrap{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:12px; }
+th, td{ padding:8px 10px; text-align:right; border-bottom:1px solid var(--border); }
+th:first-child, td:first-child{ text-align:left; }
+th{
+  background:var(--primary-light); color:var(--primary-dark);
+  font-weight:bold; font-size:11px; white-space:nowrap;
+}
+tbody tr:hover{ background:#FAFDFD; }
+tfoot td{ font-weight:bold; background:#FAFDFD; border-top:1px solid var(--primary); }
+td.text, th.text{ text-align:left; }
+tr.clickable{ cursor:pointer; }
+
+/* ============ Marken, Tags, Noten ============ */
+.tag{
+  display:inline-block; font-size:10px; padding:2px 7px; border-radius:3px;
+  background:var(--primary-light); color:var(--primary-dark); white-space:nowrap;
+}
+.tag.pos{ background:#E6F4EC; color:var(--pos); }
+.tag.warn{ background:#FBF2DF; color:var(--warn); }
+.tag.neg{ background:#F8E7E3; color:var(--neg); }
+.tag.idle{ background:#EFF3F3; color:var(--ink-soft); }
+.grade{
+  display:inline-block; min-width:26px; text-align:center;
+  padding:3px 7px; border-radius:4px;
+  font-weight:bold; font-size:12px; color:#fff; background:var(--ink-faint);
+}
+.grade.a{ background:var(--pos); }
+.grade.b{ background:var(--primary); }
+.grade.c{ background:var(--warn); }
+.grade.d{ background:var(--neg); }
+
+/* ============ Formulare ============ */
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:5px; }
+.field .hint{ font-size:10.5px; color:var(--ink-faint); margin-top:4px; }
+input[type=text], input[type=number], input[type=date], select, textarea{
+  width:100%;
+  font-family:inherit; font-size:12.5px; color:var(--ink);
+  background:var(--white);
+  border:1px solid var(--border); border-radius:4px;
+  padding:9px 10px;
+}
+textarea{ min-height:80px; resize:vertical; line-height:1.5; }
+input:focus, select:focus, textarea:focus{
+  outline:none; border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(43,182,183,.22);
+}
+.check{
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; margin-bottom:10px; cursor:pointer;
+}
+.check input{ width:16px; height:16px; accent-color:var(--primary); }
+
+/* XL-Erfassung für Mitarbeitende vor Ort */
+.entry input, .entry select{ font-size:15px; padding:13px 12px; }
+.entry label{ font-size:12.5px; }
+.entry .btn.primary-action{ width:100%; padding:14px; font-size:14px; }
+
+/* ============ Hinweise, Leerzustand ============ */
+.note{
+  border-left:3px solid var(--primary);
+  background:var(--primary-light);
+  padding:11px 14px; border-radius:0 4px 4px 0;
+  font-size:11.5px; line-height:1.55;
+}
+.note.warn{ border-color:var(--warn); background:#FBF4E4; }
+.note.alert{ border-color:var(--neg); background:#F9EBE8; }
+.empty{ padding:44px 20px; text-align:center; color:var(--ink-soft); font-size:12px; }
+.empty h3{ font-size:14px; color:var(--ink); margin-bottom:6px; }
+
+/* ============ Dialog ============ */
+.modal-overlay{
+  position:fixed; inset:0; z-index:60;
+  background:rgba(14,67,68,.45);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.modal{
+  width:min(600px,100%); max-height:88vh; overflow:auto;
+  background:var(--white); border-radius:6px;
+  box-shadow:0 14px 40px rgba(14,67,68,.28);
+  padding:22px 24px;
+}
+.modal h2{ font-size:15px; margin-bottom:16px; }
+
+/* ============ Briefkopf für Druck und PDF ============ */
+.letterhead{ display:none; }
+.letterhead .lh-top{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:24px; padding-bottom:10px; border-bottom:2px solid var(--primary);
+}
+.letterhead .lh-logo{ font-size:16px; font-weight:bold; color:var(--primary-dark); }
+.letterhead .lh-claim{ font-size:10px; color:var(--ink-soft); margin-top:2px; }
+.letterhead .lh-addr{ font-size:10px; text-align:right; line-height:1.5; color:var(--ink-soft); }
+.letterhead .lh-div{
+  display:flex; gap:12px; flex-wrap:wrap;
+  padding-top:6px; font-size:9.5px; color:var(--ink-faint);
+}
+.letterhead .lh-title{ margin-top:26px; }
+.letterhead .lh-title h1{ font-size:18px; }
+.letterhead .lh-title p{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+@media print{
+  @page{ size:A4 portrait; margin:14mm 14mm 18mm; }
+  body{ display:block; background:#fff; font-size:10pt; }
+  .sidebar, .toolbar, .no-print, .tabs, .btn{ display:none !important; }
+  main{ padding:0; max-width:none; }
+  .letterhead{ display:block; margin-bottom:10mm; }
+  .card{ break-inside:avoid; box-shadow:none; }
+  .kpi, .card, .band-fill, .band-over, .tag, .grade, th{
+    print-color-adjust:exact; -webkit-print-color-adjust:exact;
+  }
+}
+
+/* ============ Reiter ============ */
+.tabs{ display:flex; gap:20px; border-bottom:1px solid var(--border); margin-bottom:18px; overflow-x:auto; }
+.tabs button{
+  background:none; border:0; cursor:pointer;
+  font-family:inherit; font-size:12.5px; color:var(--ink-soft);
+  padding:10px 0; margin-bottom:-1px;
+  border-bottom:2px solid transparent; white-space:nowrap;
+}
+.tabs button.active{ color:var(--primary-dark); font-weight:bold; border-bottom-color:var(--primary); }
+
+/* ============ Mobil ============ */
+@media (max-width:900px){
+  body{ display:block; }
+  .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; align-items:center; }
+  .sidebar .brand{ padding:14px 18px; }
+  .sidebar nav{ display:flex; gap:4px; overflow-x:auto; padding:0 12px 12px; }
+  .sidebar-list, .sidebar-footer{ display:none; }
+  main{ padding:22px 18px; max-width:none; }
+  .grid-2, .grid-sidebar{ grid-template-columns:1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<aside class="sidebar no-print">
+  <div class="brand">
+    <div class="brand-name">Clean Service<br>Scaramuzzo AG</div>
+    <small>Auftragsbewertung</small>
+  </div>
+  <nav id="nav"></nav>
+  <div class="sidebar-list">
+    <div class="sidebar-list-head">
+      <span>Baustellen</span>
+      <button title="Auftrag anlegen" onclick="auftragDialog()">+</button>
+    </div>
+    <div class="sidebar-month-list" id="sidebarList" style="flex:1;overflow-y:auto;padding-bottom:10px"></div>
+  </div>
+  <div class="sidebar-footer" id="sidebarFoot"></div>
+</aside>
+
+<main id="view"></main>
+<div id="modal"></div>
+
+<script>
+/* =====================================================================
+   Auftragsbewertung · Clean Service Scaramuzzo AG
+   Vergleicht verkaufte gegen geleistete Stunden je Baustelle und zeigt,
+   welcher Anteil der geleisteten Stunden verrechenbar ist.
+   ===================================================================== */
+
+/* ---------- Speicher ---------- */
+const Store = (() => {
+  const KEY = 'cs_auftragsbewertung_v1';
+  let mem = null, ok = true;
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); } catch(e){ ok = false; }
+  return {
+    persistent: ok,
+    load(){ if(!ok) return mem; try{ const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } },
+    save(d){ mem = d; if(!ok) return; try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
+  };
+})();
+
+/* ---------- Hilfsmittel ---------- */
+const uid  = () => Math.random().toString(36).slice(2,9);
+const num  = v => { const n = parseFloat(String(v).replace(',','.')); return isNaN(n) ? 0 : n; };
+const h    = v => (Math.round(num(v)*100)/100).toLocaleString('de-CH',{minimumFractionDigits:1,maximumFractionDigits:2});
+const chf  = v => Math.round(num(v)).toLocaleString('de-CH');
+const pct  = v => (Math.round(num(v)*10)/10).toLocaleString('de-CH',{minimumFractionDigits:1,maximumFractionDigits:1});
+const esc  = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dch  = s => { if(!s) return '—'; const p = String(s).split('-'); return p.length===3 ? p[2]+'.'+p[1]+'.'+p[0] : s; };
+const today= () => new Date().toISOString().slice(0,10);
+
+/* ---------- Struktur ---------- */
+const BLOCK_DEFS = [
+  { key:'bau',   name:'Baureinigung (Hauptauftrag)' },
+  { key:'grob',  name:'Grobreinigung' },
+  { key:'nach',  name:'Nachreinigung' },
+  { key:'regie', name:'Regiearbeiten' }
+];
+
+function neuerAuftrag(felder = {}){
+  return Object.assign({
+    id:uid(), objekt:'', adresse:'', auftraggeber:'', auftragsnr:'',
+    bl:'', sparte:'Spezialreinigung', start:'', ende:'', werkvertrag:'',
+    bloecke: BLOCK_DEFS.map(d => ({ key:d.key, name:d.name, sollPauschal:0, positionen:[], ausfuehrungen:[] }))
+  }, felder);
+}
+
+/* ---------- Startdaten aus der Liste von Loris ---------- */
+function seed(){
+  const bauma = neuerAuftrag({
+    objekt:'BAUMA', adresse:'Bauma ZH', auftraggeber:'—',
+    bl:'Loris Braun', start:'2025-07-16', werkvertrag:'Stundenübersicht Baustelle BAUMA'
+  });
+  const B = k => bauma.bloecke.find(b => b.key === k);
+
+  [['Baureinigung integrale Tests 2. UG',17],['Baureinigung integrale Tests 1. UG',15],
+   ['Baureinigung integrale Tests EG',10],['Baureinigung integrale Tests 1. OG',9.5],
+   ['Baureinigung integrale Tests 2. OG',9],['Baureinigung integrale Tests 1. DG',9],
+   ['Baureinigung integrale Tests 2. DG',5.5],
+   ['Baureinigung 2. UG',17],['Baureinigung 1. UG',15],['Baureinigung EG',11.5],
+   ['Baureinigung 1. OG',11],['Baureinigung 2. OG',11],['Baureinigung 1. DG',11],
+   ['Baureinigung 2. DG',6.5]
+  ].forEach(([n,s]) => B('bau').positionen.push({ id:uid(), name:n, soll:s }));
+
+  const grob = B('grob');
+  [['Grob 2. UG',56,19,'2025-09-17','Ausführungen 25.07. / 22.08. / 17.09.2025'],
+   ['Grob 1. UG',49,19,'2025-09-17','Ausführungen 25.07. / 22.08. / 17.09.2025'],
+   ['Grob EG',33,19,'2025-08-06','Ausführungen 16.07. / 25.07. / 06.08.2025'],
+   ['Grob 1. OG',31,14,'2025-09-17','Ausführungen 25.07. / 01.09. / 17.09.2025'],
+   ['Grob 2. OG',30,13,'2025-09-17','Ausführungen 25.07. / 01.09. / 17.09.2025'],
+   ['Grob 1. DG',30,10,'2025-09-17','Ausführungen 25.07. / 01.09. / 17.09.2025'],
+   ['Grob 2. DG',17,10,'2025-09-17','Ausführungen 25.07. / 01.09. / 17.09.2025'],
+   ['Umgebungsarbeiten nach Aufwand',40,0,'',''],
+   ['Mulde (2x enthalten)',2,1,'2025-08-22','']
+  ].forEach(([n,s,ist,d,bem]) => {
+    const p = { id:uid(), name:n, soll:s };
+    grob.positionen.push(p);
+    if(ist > 0) grob.ausfuehrungen.push({ id:uid(), posId:p.id, datum:d, stunden:ist, enthalten:true, genehmigt:false, bemerkung:bem });
+  });
+
+  B('nach').sollPauschal  = 20;
+  B('regie').sollPauschal = 200;
+
+  const aehren = neuerAuftrag({
+    objekt:'Aehrenweg 11', adresse:'Aehrenweg 11, 8050 Zürich',
+    auftraggeber:'Bereuter Totalunternehmung AG',
+    werkvertrag:'Termin offen — aus Pipeline Hauptplanung'
+  });
+  aehren.bloecke.find(b => b.key === 'bau').sollPauschal = 120;
+
+  return { settings:{ rateSell:52, rateCost:38 }, auftraege:[bauma, aehren] };
+}
+
+/* ---------- Zustand ---------- */
+let state = Store.load() || seed();
+let ui = { view:'portfolio', auftragId:state.auftraege[0]?.id || null, tab:'bau' };
+function save(){ Store.save(state); }
+function auftrag(){ return state.auftraege.find(a => a.id === ui.auftragId) || null; }
+
+/* ---------- Rechnen ---------- */
+function blockWerte(b){
+  const soll = b.positionen.length ? b.positionen.reduce((s,p) => s + num(p.soll), 0) : num(b.sollPauschal);
+  const ist  = b.ausfuehrungen.reduce((s,a) => s + num(a.stunden), 0);
+  const verrechenbar = b.ausfuehrungen.filter(a => a.enthalten || a.genehmigt).reduce((s,a) => s + num(a.stunden), 0);
+  const quote = soll > 0 ? ist/soll : 0;
+  return { soll, ist, verrechenbar, nichtVerrechenbar: ist - verrechenbar, rest: soll - ist, quote,
+    status: ist === 0 ? 'idle' : quote > 1 ? 'alert' : quote > 0.9 ? 'warn' : 'ok' };
+}
+
+function auftragWerte(a){
+  const per = {}; let soll=0, ist=0, verrechenbar=0, ausf=0, dokOk=0;
+  a.bloecke.forEach(b => {
+    const w = blockWerte(b); per[b.key] = w;
+    soll += w.soll; ist += w.ist; verrechenbar += w.verrechenbar;
+    b.ausfuehrungen.forEach(x => { ausf++; if(x.datum && num(x.stunden) > 0 && (x.enthalten || x.genehmigt) && x.bemerkung) dokOk++; });
+  });
+  const nichtVerrechenbar = ist - verrechenbar;
+  const rateSell = num(a.rateSell) || num(state.settings.rateSell);
+  const rateCost = num(a.rateCost) || num(state.settings.rateCost);
+  const ertrag = verrechenbar * rateSell, kosten = ist * rateCost;
+
+  const ueber = soll > 0 ? Math.max(0, ist/soll - 1) : 0;
+  const pDisziplin = soll > 0 ? 100 * Math.max(0, 1 - ueber/0.30) : 100;
+  const pVerrech   = ist > 0 ? 100 * (verrechenbar/ist) : 100;
+  const nachQuote  = per.bau.ist > 0 ? per.nach.ist/per.bau.ist : 0;
+  const pNach      = 100 * Math.max(0, 1 - nachQuote/0.10);
+  const pDok       = ausf > 0 ? 100 * (dokOk/ausf) : 100;
+  const score = 0.40*pDisziplin + 0.30*pVerrech + 0.20*pNach + 0.10*pDok;
+
+  return { per, soll, ist, verrechenbar, nichtVerrechenbar, rest: soll - ist,
+    quote: soll > 0 ? ist/soll : 0, rateSell, rateCost, ertrag, kosten,
+    deckungsbeitrag: ertrag - kosten, risiko: nichtVerrechenbar * rateSell,
+    ausf, dokOk, teil:{ disziplin:pDisziplin, verrech:pVerrech, nach:pNach, dok:pDok },
+    score, note: score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : 'D',
+    bewertbar: ist > 0, reife: soll > 0 ? ist/soll : 0, vorlaeufig: soll > 0 && ist/soll < 0.5 };
+}
+
+/* ---------- Bausteine ---------- */
+function band(titel, w, inline){
+  const max  = Math.max(w.soll, w.ist) || 1;
+  const fill = Math.min(w.ist, w.soll)/max*100;
+  const over = w.ist > w.soll ? (w.ist - w.soll)/max*100 : 0;
+  const mark = w.soll/max*100;
+  const cls  = w.status === 'alert' ? ' alert' : w.status === 'warn' ? ' warn' : '';
+  return `<div class="band${inline ? ' inline' : ''}">
+    ${inline ? '' : `<div class="band-head">
+      <span class="name">${esc(titel)}</span>
+      <span class="figures"><b>${h(w.ist)}</b> / ${h(w.soll)} h · ${pct(w.quote*100)} %</span>
+    </div>`}
+    <div class="band-track">
+      <div class="band-fill${cls}" style="width:${fill}%"></div>
+      ${over > 0 ? `<div class="band-over" style="left:${mark}%;width:${over}%"></div>
+      <div class="band-mark" style="left:calc(${mark}% - 1px)"></div>` : ''}
+    </div>
+    ${inline ? '' : `<div class="band-legend">${w.ist > w.soll
+      ? 'Über Soll: ' + h(w.ist - w.soll) + ' h'
+      : 'Verbleibend: ' + h(w.soll - w.ist) + ' h'}</div>`}
+  </div>`;
+}
+
+function tag(status){
+  const m = { ok:['pos','Im Rahmen'], warn:['warn','Kritisch'], alert:['neg','Überschritten'], idle:['idle','Nicht begonnen'] };
+  const [c,t] = m[status] || m.idle;
+  return `<span class="tag ${c}">${t}</span>`;
+}
+
+function kpi(value, unit, label, sub, mod){
+  return `<div class="kpi">
+    <div class="label">${esc(label)}</div>
+    <div class="value ${mod || ''}">${value}${unit ? `<span class="unit">${unit}</span>` : ''}</div>
+    ${sub ? `<div class="sub">${sub}</div>` : ''}
+  </div>`;
+}
+
+function letterhead(titel, unter){
+  return `<div class="letterhead">
+    <div class="lh-top">
+      <div>
+        <div class="lh-logo">Clean Service Scaramuzzo AG</div>
+        <div class="lh-claim">Tradition die glänzt</div>
+      </div>
+      <div class="lh-addr">
+        Industriestrasse 5 · 8307 Effretikon<br>
+        0844 355 355 · info@clean-service.ch<br>
+        ISO 9001 · ISO 14001 · ISO 45001
+      </div>
+    </div>
+    <div class="lh-div">
+      <span>Unterhaltsreinigung</span><span>Putzfrauenservice</span><span>Spezialreinigung</span>
+      <span>Hauswartung</span><span>Hotelreinigung</span>
+    </div>
+    <div class="lh-title"><h1>${esc(titel)}</h1><p>${esc(unter)}</p></div>
+  </div>`;
+}
+
+/* ---------- Sidebar ---------- */
+function renderSidebar(){
+  const items = [['portfolio','Portfolio'],['auftrag','Auftrag'],['erfassung','Stunden erfassen'],
+                 ['bericht','Bewertung'],['einstellungen','Einstellungen']];
+  document.getElementById('nav').innerHTML = items.map(([k,t]) =>
+    `<button class="${ui.view===k?'active':''}" onclick="go('${k}')">${t}</button>`).join('');
+
+  document.getElementById('sidebarList').innerHTML = state.auftraege.length
+    ? state.auftraege.map(a => {
+        const w = auftragWerte(a);
+        return `<div class="sidebar-item ${a.id===ui.auftragId?'active':''}" onclick="oeffne('${a.id}')">
+          <span>${esc(a.objekt || 'Ohne Namen')}</span>
+          <span class="meta ${w.quote>1?'neg':''}">${h(w.ist)}/${h(w.soll)}</span>
+        </div>`;
+      }).join('')
+    : '<div class="sidebar-empty">Noch keine Baustelle</div>';
+
+  const tot = state.auftraege.reduce((s,a) => { const w = auftragWerte(a); s.soll += w.soll; s.ist += w.ist; return s; }, {soll:0,ist:0});
+  document.getElementById('sidebarFoot').innerHTML =
+    `${h(tot.ist)} von ${h(tot.soll)} h geleistet<br>Stand ${dch(today())}`;
+}
+
+/* ---------- Portfolio ---------- */
+function viewPortfolio(){
+  if(!state.auftraege.length){
+    return `<header class="page-head"><div><h1>Portfolio</h1></div></header>
+      <div class="card"><div class="empty">
+        <h3>Noch keine Baustelle erfasst</h3>
+        <p>Legen Sie den ersten Auftrag an, um verkaufte und geleistete Stunden zu vergleichen.</p>
+        <p style="margin-top:18px"><button class="btn primary-action" onclick="auftragDialog()">Auftrag anlegen</button></p>
+      </div></div>`;
+  }
+  const tot = state.auftraege.reduce((s,a) => {
+    const w = auftragWerte(a);
+    s.soll+=w.soll; s.ist+=w.ist; s.nv+=w.nichtVerrechenbar; s.db+=w.deckungsbeitrag; return s;
+  }, {soll:0,ist:0,nv:0,db:0});
+
+  const rows = state.auftraege.map(a => {
+    const w = auftragWerte(a);
+    return `<tr class="clickable" onclick="oeffne('${a.id}')">
+      <td><b>${esc(a.objekt)}</b><div style="color:var(--ink-soft);font-size:10.5px">${esc(a.auftraggeber || '—')}</div></td>
+      <td class="text">${esc(a.bl || '—')}</td>
+      <td>${h(w.soll)}</td>
+      <td>${h(w.ist)}</td>
+      <td class="text" style="min-width:110px">${band('', {soll:w.soll, ist:w.ist, quote:w.quote,
+        status:(w.ist===0?'idle':w.quote>1?'alert':w.quote>0.9?'warn':'ok')}, true)}</td>
+      <td>${w.nichtVerrechenbar > 0 ? chf(w.risiko)+' CHF' : '—'}</td>
+      <td class="text">${w.bewertbar ? `<span class="grade ${w.note.toLowerCase()}">${w.note}</span>` : tag('idle')}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <header class="page-head">
+    <div><h1>Portfolio</h1><p>Alle Baustellen mit Stundenstand, Verrechenbarkeit und Note.</p></div>
+    <div class="toolbar"><button class="btn primary-action" onclick="auftragDialog()">Auftrag anlegen</button></div>
+  </header>
+
+  <div class="kpi-row">
+    ${kpi(h(tot.soll),'h','Verkaufte Stunden')}
+    ${kpi(h(tot.ist),'h','Geleistete Stunden')}
+    ${kpi(h(tot.nv),'h','Nicht verrechenbar', null, tot.nv > 0 ? 'neg' : 'pos')}
+    ${kpi(chf(tot.db),'CHF','Deckungsbeitrag bis heute', null, tot.db >= 0 ? 'pos' : 'neg')}
+  </div>
+
+  <div class="card flush">
+    <div class="card-head"><h2>Baustellen</h2><span class="tag">${state.auftraege.length} Aufträge</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Baustelle</th><th class="text">Bauleitung</th><th>Soll h</th><th>Ist h</th>
+        <th class="text">Verlauf</th><th>Nicht verrechenbar</th><th class="text">Note</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  </div>
+
+  <div class="note">
+    Der Deckungsbeitrag rechnet mit ${h(state.settings.rateSell)} CHF Verrechnungssatz und
+    ${h(state.settings.rateCost)} CHF Kostensatz pro Stunde. Beides sind Annahmen und in den Einstellungen
+    zu hinterlegen, bevor die Zahl gegenüber der GL verwendet wird.
+  </div>`;
+}
+
+/* ---------- Auftrag ---------- */
+function viewAuftrag(){
+  const a = auftrag();
+  if(!a) return `<div class="card"><div class="empty"><h3>Kein Auftrag gewählt</h3><p>Wählen Sie links eine Baustelle.</p></div></div>`;
+  const w = auftragWerte(a);
+  const b = a.bloecke.find(x => x.key === ui.tab) || a.bloecke[0];
+  const bw = blockWerte(b);
+
+  const tabs = a.bloecke.map(x => {
+    const v = blockWerte(x);
+    return `<button class="${x.key===ui.tab?'active':''}" onclick="ui.tab='${x.key}';render()">
+      ${esc(x.name)} <span style="color:var(--ink-faint)">${h(v.ist)}/${h(v.soll)}</span></button>`;
+  }).join('');
+
+  const posRows = b.positionen.map(p => {
+    const ist = b.ausfuehrungen.filter(x => x.posId === p.id).reduce((s,x) => s + num(x.stunden), 0);
+    const q = num(p.soll) > 0 ? ist/num(p.soll) : 0;
+    const st = ist === 0 ? 'idle' : q > 1 ? 'alert' : q > 0.9 ? 'warn' : 'ok';
+    return `<tr>
+      <td>${esc(p.name)}</td><td>${h(p.soll)}</td><td>${ist ? h(ist) : '—'}</td>
+      <td>${ist ? h(num(p.soll)-ist) : '—'}</td><td class="text">${tag(st)}</td>
+      <td class="no-print"><button class="btn small" onclick="posLoeschen('${b.key}','${p.id}')">Entfernen</button></td>
+    </tr>`;
+  }).join('');
+
+  const ausRows = b.ausfuehrungen.slice().sort((x,y) => (y.datum||'').localeCompare(x.datum||'')).map(x => {
+    const p = b.positionen.find(pp => pp.id === x.posId);
+    const ok = x.enthalten || x.genehmigt;
+    return `<tr>
+      <td>${dch(x.datum)}</td><td class="text">${esc(p ? p.name : b.name)}</td>
+      <td>${h(x.stunden)}</td><td class="text">${x.enthalten ? 'ja' : 'nein'}</td>
+      <td class="text">${x.genehmigt ? 'ja' : 'nein'}</td>
+      <td class="text">${ok ? '<span class="tag pos">verrechenbar</span>' : '<span class="tag neg">nicht gedeckt</span>'}</td>
+      <td class="text" style="font-size:10.5px;color:var(--ink-soft)">${esc(x.bemerkung || '')}</td>
+      <td class="no-print"><button class="btn small" onclick="ausLoeschen('${b.key}','${x.id}')">Entfernen</button></td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <header class="page-head">
+    <div><h1>${esc(a.objekt || 'Ohne Bezeichnung')}</h1>
+      <p>${esc(a.adresse || '—')} · Auftraggeber ${esc(a.auftraggeber || '—')} · Bauleitung ${esc(a.bl || '—')} · ${esc(a.sparte)}</p></div>
+    <div class="toolbar">
+      <button class="btn" onclick="auftragDialog('${a.id}')">Stammdaten</button>
+      <button class="btn" onclick="go('bericht')">Bewertung</button>
+      <button class="btn primary-action" onclick="erfassenDialog('${b.key}')">Stunden erfassen</button>
+    </div>
+  </header>
+
+  <div class="kpi-row">
+    ${kpi(h(w.soll),'h','Verkauft')}
+    ${kpi(h(w.ist),'h','Geleistet')}
+    ${kpi(h(w.rest),'h','Verbleibend', null, w.rest < 0 ? 'neg' : 'pos')}
+    ${kpi(w.bewertbar ? Math.round(w.score) : '—','', w.bewertbar ? (w.vorlaeufig ? 'Zwischenstand · Note '+w.note : 'Bewertung · Note '+w.note) : 'Bewertung',
+      null, w.bewertbar ? (w.score>=70?'pos':w.score>=55?'':'neg') : '')}
+  </div>
+
+  <div class="card">
+    <h2>Stundenstand nach Leistung</h2>
+    <div class="desc">Der Balken zeigt die geleisteten gegen die verkauften Stunden.</div>
+    ${a.bloecke.map(x => band(x.name, blockWerte(x))).join('')}
+  </div>
+
+  <div class="tabs">${tabs}</div>
+
+  <div class="card">
+    <div class="card-head"><h2>${esc(b.name)}</h2>${tag(bw.status)}</div>
+    <div class="kpi-row" style="margin-bottom:0">
+      ${kpi(h(bw.soll),'h','Zur Verfügung')}
+      ${kpi(h(bw.ist),'h','Benötigt')}
+      ${kpi(h(bw.rest),'h','Noch verfügbar', null, bw.rest < 0 ? 'neg' : '')}
+      ${kpi(bw.nichtVerrechenbar > 0 ? h(bw.nichtVerrechenbar) : '0','h','Nicht verrechenbar', null, bw.nichtVerrechenbar > 0 ? 'neg' : '')}
+    </div>
+  </div>
+
+  <div class="card flush">
+    <div class="card-head"><h2>Positionen</h2>
+      <span class="no-print"><button class="btn secondary" onclick="posDialog('${b.key}')">Position hinzufügen</button></span></div>
+    ${b.positionen.length ? `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Position</th><th>Soll h</th><th>Ist h</th><th>Differenz</th><th class="text">Status</th><th class="no-print"></th></tr></thead>
+      <tbody>${posRows}</tbody>
+      <tfoot><tr><td>Total</td><td>${h(bw.soll)}</td><td>${h(bw.ist)}</td><td>${h(bw.rest)}</td><td colspan="2"></td></tr></tfoot>
+    </table></div>` : `
+    <div style="padding:0 22px 22px">
+      <div class="field" style="max-width:300px;margin:0">
+        <label for="pausch">Stunden zur Verfügung (pauschal)</label>
+        <input id="pausch" type="number" step="0.25" value="${b.sollPauschal}" onchange="setzePauschal('${b.key}', this.value)">
+        <div class="hint">Ohne Einzelpositionen, zum Beispiel Regie gemäss Werkvertrag.</div>
+      </div>
+    </div>`}
+  </div>
+
+  <div class="card flush">
+    <div class="card-head"><h2>Ausführungen und Rapporte</h2>
+      <span class="no-print"><button class="btn secondary" onclick="erfassenDialog('${b.key}')">Stunden erfassen</button></span></div>
+    ${b.ausfuehrungen.length ? `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Datum</th><th class="text">Position</th><th>Stunden</th><th class="text">Im Auftrag</th>
+        <th class="text">Rapport genehmigt</th><th class="text">Verrechenbar</th><th class="text">Bemerkung</th><th class="no-print"></th></tr></thead>
+      <tbody>${ausRows}</tbody>
+      <tfoot><tr><td>Total geleistet</td><td></td><td>${h(bw.ist)}</td><td colspan="5"></td></tr></tfoot>
+    </table></div>` : `
+    <div class="empty"><h3>Keine Stunden erfasst</h3><p>Sobald die Bauleitung Rapporte liefert, werden sie hier eingetragen.</p></div>`}
+  </div>
+
+  ${bw.nichtVerrechenbar > 0 ? `<div class="note alert">
+    ${h(bw.nichtVerrechenbar)} Stunden in diesem Block sind weder im Auftrag enthalten noch durch einen
+    genehmigten Rapport gedeckt. Das entspricht rund ${chf(bw.nichtVerrechenbar * w.rateSell)} CHF,
+    die ohne Nachtrag nicht fakturiert werden können.
+  </div>` : ''}`;
+}
+
+/* ---------- Erfassung ---------- */
+function viewErfassung(){
+  const a = auftrag();
+  if(!a) return `<div class="card"><div class="empty"><h3>Kein Auftrag vorhanden</h3></div></div>`;
+  const b = a.bloecke.find(x => x.key === ui.tab) || a.bloecke[0];
+  return `
+  <header class="page-head">
+    <div><h1>Stunden erfassen</h1><p>Für die Erfassung direkt auf der Baustelle.</p></div>
+  </header>
+  <div class="card entry" style="max-width:520px">
+    <div class="field"><label for="e_a">Baustelle</label>
+      <select id="e_a" onchange="ui.auftragId=this.value;render()">
+        ${state.auftraege.map(x => `<option value="${x.id}" ${x.id===ui.auftragId?'selected':''}>${esc(x.objekt)}</option>`).join('')}
+      </select></div>
+    <div class="field"><label for="e_b">Leistung</label>
+      <select id="e_b" onchange="ui.tab=this.value;render()">
+        ${a.bloecke.map(x => `<option value="${x.key}" ${x.key===ui.tab?'selected':''}>${esc(x.name)}</option>`).join('')}
+      </select></div>
+    <div class="field"><label for="e_p">Bereich</label>
+      <select id="e_p"><option value="">Ganzer Block</option>
+        ${b.positionen.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}
+      </select></div>
+    <div class="field"><label for="e_d">Datum</label><input id="e_d" type="date" value="${today()}"></div>
+    <div class="field"><label for="e_h">Stunden</label><input id="e_h" type="number" step="0.25" placeholder="0.00"></div>
+    <label class="check"><input type="checkbox" id="e_ent" checked> Im Auftrag enthalten</label>
+    <label class="check"><input type="checkbox" id="e_gen"> Rapport durch Bauleitung genehmigt</label>
+    <div class="field"><label for="e_bem">Was wurde ausgeführt?</label><textarea id="e_bem"></textarea></div>
+    <button class="btn primary-action" onclick="erfassenSpeichern()">Speichern</button>
+    <div id="e_msg" style="margin-top:10px"></div>
+  </div>`;
+}
+
+/* ---------- Bewertung ---------- */
+function viewBericht(){
+  const a = auftrag();
+  if(!a) return `<div class="card"><div class="empty"><h3>Kein Auftrag gewählt</h3></div></div>`;
+  const w = auftragWerte(a);
+  const teile = [
+    ['Stundendisziplin', w.teil.disziplin, 40, `Ist ${h(w.ist)} h gegen Soll ${h(w.soll)} h`],
+    ['Verrechenbarkeit', w.teil.verrech, 30, `${h(w.verrechenbar)} von ${h(w.ist)} h gedeckt`],
+    ['Nacharbeit', w.teil.nach, 20, `Nachreinigung ${h(w.per.nach.ist)} h zu Baureinigung ${h(w.per.bau.ist)} h`],
+    ['Dokumentation', w.teil.dok, 10, `${w.dokOk} von ${w.ausf} Ausführungen vollständig`]
+  ];
+
+  return `
+  ${letterhead('Auftragsbewertung ' + (a.objekt || ''), (a.adresse || '') + ' · Stand ' + dch(today()))}
+
+  <header class="page-head no-print">
+    <div><h1>Bewertung ${esc(a.objekt)}</h1>
+      <p>Stand ${dch(today())} · Verrechnungssatz ${h(w.rateSell)} CHF · Kostensatz ${h(w.rateCost)} CHF</p></div>
+    <div class="toolbar">
+      <button class="btn" onclick="go('auftrag')">Zurück</button>
+      <button class="btn primary-action" onclick="window.print()">Als PDF drucken</button>
+    </div>
+  </header>
+
+  ${!w.bewertbar ? `<div class="note warn" style="margin-bottom:18px">
+    Für diesen Auftrag sind noch keine Stunden erfasst. Die Bewertung wird erst mit dem ersten Rapport aussagekräftig.
+  </div>` : w.vorlaeufig ? `<div class="note" style="margin-bottom:18px">
+    Erst ${pct(w.reife*100)} Prozent der verkauften Stunden sind geleistet. Die Note ist ein Zwischenstand
+    und sagt bisher vor allem, dass der Auftrag im Rahmen läuft.
+  </div>` : ''}
+
+  <div class="grid-sidebar">
+    <div>
+      <div class="card">
+        <h2>Stundenstand nach Leistung</h2>
+        <div class="desc">Verkaufte gegen geleistete Stunden je Leistungsblock.</div>
+        ${a.bloecke.map(x => band(x.name, blockWerte(x))).join('')}
+      </div>
+
+      <div class="card flush">
+        <div class="card-head"><h2>Zusammenzug</h2></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Leistung</th><th>Soll h</th><th>Ist h</th><th>Verbleibend</th><th>Nicht verrechenbar</th><th class="text">Status</th></tr></thead>
+          <tbody>${a.bloecke.map(x => { const v = blockWerte(x); return `<tr>
+            <td>${esc(x.name)}</td><td>${h(v.soll)}</td><td>${h(v.ist)}</td><td>${h(v.rest)}</td>
+            <td>${v.nichtVerrechenbar > 0 ? h(v.nichtVerrechenbar) : '—'}</td><td class="text">${tag(v.status)}</td></tr>`; }).join('')}</tbody>
+          <tfoot><tr><td>Total</td><td>${h(w.soll)}</td><td>${h(w.ist)}</td><td>${h(w.rest)}</td><td>${h(w.nichtVerrechenbar)}</td><td></td></tr></tfoot>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <h2>Wirtschaftlichkeit bis heute</h2>
+        <div class="kpi-row" style="margin-bottom:0">
+          ${kpi(chf(w.ertrag),'CHF','Verrechenbarer Ertrag')}
+          ${kpi(chf(w.kosten),'CHF','Stundenkosten')}
+          ${kpi(chf(w.deckungsbeitrag),'CHF','Deckungsbeitrag', null, w.deckungsbeitrag >= 0 ? 'pos' : 'neg')}
+        </div>
+        ${w.risiko > 0 ? `<div class="note alert" style="margin-top:14px">
+          ${h(w.nichtVerrechenbar)} geleistete Stunden sind nicht gedeckt. Ohne Nachtrag oder nachträgliche
+          Rapportfreigabe entgehen der Firma rund ${chf(w.risiko)} CHF.
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div>
+      <div class="card primary">
+        <div class="card-head">
+          <h2>${w.vorlaeufig ? 'Note (Zwischenstand)' : 'Note'}</h2>
+          <span class="grade ${w.bewertbar ? w.note.toLowerCase() : ''}">${w.bewertbar ? w.note : '—'}</span>
+        </div>
+        <div style="font-size:26px;font-weight:bold;margin-bottom:2px">
+          ${w.bewertbar ? Math.round(w.score) : '—'}<span style="font-size:12px;font-weight:normal;color:var(--ink-soft)"> von 100</span>
+        </div>
+        <div class="desc">Gesamtbewertung des Auftrags</div>
+        ${teile.map(([n,p,g,d]) => `
+          <div style="padding:8px 0;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;font-size:11.5px">
+              <span><b>${n}</b></span><span style="color:var(--ink-soft)">${Math.round(p)} · ${g} %</span>
+            </div>
+            <div style="height:5px;background:var(--primary-light);border-radius:3px;margin:5px 0 4px">
+              <div style="height:100%;border-radius:3px;width:${Math.max(0,Math.min(100,p))}%;background:var(${p>=70?'--pos':p>=55?'--warn':'--neg'})"></div>
+            </div>
+            <div style="font-size:10.5px;color:var(--ink-soft)">${d}</div>
+          </div>`).join('')}
+        <div style="font-size:10.5px;color:var(--ink-faint);margin-top:10px">A ab 85 · B ab 70 · C ab 55 · D darunter</div>
+      </div>
+
+      <div class="card">
+        <h2>Massnahmen</h2>
+        <div class="stack" style="margin-top:12px">
+          ${massnahmen(a,w).map(m => `<div class="note ${m.stufe}">${m.text}</div>`).join('') ||
+            '<div style="font-size:11.5px;color:var(--ink-soft)">Keine Auffälligkeiten. Auftrag läuft im Rahmen.</div>'}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function massnahmen(a,w){
+  const out = [];
+  if(w.quote > 1) out.push({stufe:'alert', text:`Der Auftrag ist um ${h(w.ist-w.soll)} Stunden überzogen. Nachtrag beim Auftraggeber auslösen, bevor weitere Stunden geleistet werden.`});
+  else if(w.quote > 0.9 && w.ist > 0) out.push({stufe:'warn', text:'Über 90 Prozent der verkauften Stunden sind verbraucht. Restleistungen mit der Bauleitung terminieren.'});
+  if(w.nichtVerrechenbar > 0) out.push({stufe:'alert', text:`${h(w.nichtVerrechenbar)} Stunden ohne Auftragsdeckung und ohne genehmigten Rapport. Freigaben nachholen oder als Regie fakturieren.`});
+  if(w.ausf > 0 && w.dokOk < w.ausf) out.push({stufe:'warn', text:`${w.ausf - w.dokOk} Ausführungen sind unvollständig erfasst. Ohne Datum, Bemerkung und Freigabeentscheid ist die Fakturierung angreifbar.`});
+  const ohneFreigabe = a.bloecke.reduce((n,b) => n + b.ausfuehrungen.filter(x => !x.genehmigt).length, 0);
+  if(ohneFreigabe > 0) out.push({stufe:'warn', text:`${ohneFreigabe} Ausführungen sind ohne dokumentierte Freigabe der Bauleitung erfasst. Bei einer Rückfrage des Auftraggebers fehlt der Nachweis.`});
+  const reg = w.per.regie;
+  if(reg && reg.ist === 0 && reg.soll > 0) out.push({stufe:'', text:`${h(reg.soll)} Regiestunden sind im Werkvertrag enthalten und noch nicht abgerufen. Bei Zusatzarbeiten zuerst diesen Topf belasten.`});
+  return out;
+}
+
+/* ---------- Einstellungen ---------- */
+function viewEinstellungen(){
+  return `
+  <header class="page-head"><div><h1>Einstellungen</h1><p>Sätze, Datensicherung und Rechenlogik.</p></div></header>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Stundensätze</h2>
+      <div class="desc">Grundlage für Deckungsbeitrag und Risikobetrag.</div>
+      <div class="field"><label for="s_sell">Verrechnungssatz CHF pro Stunde</label>
+        <input id="s_sell" type="number" step="0.5" value="${state.settings.rateSell}"
+               onchange="state.settings.rateSell=num(this.value);save();render()"></div>
+      <div class="field"><label for="s_cost">Kostensatz CHF pro Stunde</label>
+        <input id="s_cost" type="number" step="0.5" value="${state.settings.rateCost}"
+               onchange="state.settings.rateCost=num(this.value);save();render()">
+        <div class="hint">Vollkosten inklusive Sozialleistungen, Material und Fahrzeug.</div></div>
+      <div class="note warn">Beide Werte sind Annahmen und noch nicht mit der Buchhaltung abgeglichen.</div>
+    </div>
+
+    <div class="card">
+      <h2>Daten</h2>
+      <div class="desc">Sichern, laden und zurücksetzen.</div>
+      <div class="row" style="margin-bottom:14px">
+        <button class="btn secondary" onclick="exportJSON()">Daten sichern</button>
+        <button class="btn secondary" onclick="document.getElementById('imp').click()">Daten laden</button>
+        <input id="imp" type="file" accept="application/json" style="display:none" onchange="importJSON(this)">
+        <button class="btn danger" onclick="zuruecksetzen()">Zurücksetzen</button>
+      </div>
+      <div class="note ${Store.persistent ? '' : 'alert'}">
+        ${Store.persistent
+          ? 'Die Daten liegen im Browser dieses Geräts und sind nicht auf einem Server gesichert. Für den produktiven Einsatz ist die Anbindung an Firestore oder Supabase nötig, gleich wie bei ReportingPFS.'
+          : 'In dieser Vorschau ist der Browserspeicher gesperrt. Eingaben bleiben nur bis zum Neuladen erhalten. Nach dem Deployment auf Vercel funktioniert die Speicherung normal.'}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Wie die Bewertung rechnet</h2>
+    <div style="font-size:11.5px;line-height:1.65;color:var(--ink-soft)">
+      <p><b>Stundendisziplin, 40 Prozent.</b> Volle Punktzahl, solange die geleisteten Stunden die verkauften nicht übersteigen. Null Punkte ab dreissig Prozent Überzug.</p>
+      <p style="margin-top:8px"><b>Verrechenbarkeit, 30 Prozent.</b> Anteil der geleisteten Stunden, die im Auftrag enthalten sind oder einen genehmigten Rapport haben.</p>
+      <p style="margin-top:8px"><b>Nacharbeit, 20 Prozent.</b> Nachreinigungsstunden im Verhältnis zur Baureinigung. Null Punkte ab zehn Prozent.</p>
+      <p style="margin-top:8px"><b>Dokumentation, 10 Prozent.</b> Anteil der Ausführungen mit Datum, Stunden, Bemerkung und getroffenem Freigabeentscheid.</p>
+    </div>
+  </div>`;
+}
+
+/* ---------- Dialoge ---------- */
+function modal(inhalt){
+  document.getElementById('modal').innerHTML =
+    `<div class="modal-overlay" onclick="if(event.target===this)modalZu()"><div class="modal">${inhalt}</div></div>`;
+}
+function modalZu(){ document.getElementById('modal').innerHTML = ''; }
+
+function auftragDialog(id){
+  const a = id ? state.auftraege.find(x => x.id === id) : null;
+  const f = (k,l,t='text') => `<div class="field"><label for="f_${k}">${l}</label>
+    <input id="f_${k}" type="${t}" value="${a ? esc(a[k] || '') : ''}"></div>`;
+  modal(`
+    <h2>${a ? 'Stammdaten bearbeiten' : 'Auftrag anlegen'}</h2>
+    ${f('objekt','Baustelle / Objekt')}
+    ${f('adresse','Adresse')}
+    ${f('auftraggeber','Auftraggeber')}
+    ${f('auftragsnr','Auftragsnummer')}
+    ${f('bl','Bauleitung')}
+    ${f('werkvertrag','Grundlage / Werkvertrag')}
+    <div class="grid-2">${f('start','Beginn','date')}${f('ende','Abschluss','date')}</div>
+    <div class="row">
+      <button class="btn primary-action" onclick="auftragSpeichern('${a ? a.id : ''}')">Speichern</button>
+      <button class="btn" onclick="modalZu()">Abbrechen</button>
+      ${a ? `<button class="btn danger" onclick="auftragLoeschen('${a.id}')">Löschen</button>` : ''}
+    </div>`);
+}
+
+function auftragSpeichern(id){
+  const g = k => document.getElementById('f_'+k).value.trim();
+  const felder = { objekt:g('objekt'), adresse:g('adresse'), auftraggeber:g('auftraggeber'),
+    auftragsnr:g('auftragsnr'), bl:g('bl'), werkvertrag:g('werkvertrag'), start:g('start'), ende:g('ende') };
+  if(!felder.objekt){ alert('Bitte die Baustelle benennen.'); return; }
+  if(id){ Object.assign(state.auftraege.find(x => x.id === id), felder); }
+  else { const a = neuerAuftrag(felder); state.auftraege.push(a); ui.auftragId = a.id; ui.view = 'auftrag'; }
+  save(); modalZu(); render();
+}
+
+function auftragLoeschen(id){
+  if(!confirm('Auftrag mit allen Rapporten löschen?')) return;
+  state.auftraege = state.auftraege.filter(x => x.id !== id);
+  ui.auftragId = state.auftraege[0]?.id || null; ui.view = 'portfolio';
+  save(); modalZu(); render();
+}
+
+function posDialog(key){
+  modal(`
+    <h2>Position hinzufügen</h2>
+    <div class="field"><label for="p_n">Bezeichnung</label><input id="p_n" type="text" placeholder="z. B. Baureinigung 3. OG"></div>
+    <div class="field"><label for="p_s">Stunden zur Verfügung</label><input id="p_s" type="number" step="0.25"></div>
+    <div class="row"><button class="btn primary-action" onclick="posSpeichern('${key}')">Hinzufügen</button>
+      <button class="btn" onclick="modalZu()">Abbrechen</button></div>`);
+}
+
+function posSpeichern(key){
+  const n = document.getElementById('p_n').value.trim();
+  const s = num(document.getElementById('p_s').value);
+  if(!n){ alert('Bitte eine Bezeichnung eingeben.'); return; }
+  auftrag().bloecke.find(b => b.key === key).positionen.push({ id:uid(), name:n, soll:s });
+  save(); modalZu(); render();
+}
+
+function posLoeschen(key,pid){
+  const b = auftrag().bloecke.find(x => x.key === key);
+  if(b.ausfuehrungen.some(a => a.posId === pid)){
+    if(!confirm('Zu dieser Position sind Stunden erfasst. Trotzdem entfernen?')) return;
+    b.ausfuehrungen = b.ausfuehrungen.filter(a => a.posId !== pid);
+  }
+  b.positionen = b.positionen.filter(p => p.id !== pid);
+  save(); render();
+}
+
+function setzePauschal(key,v){
+  auftrag().bloecke.find(b => b.key === key).sollPauschal = num(v);
+  save(); render();
+}
+
+function erfassenDialog(key){
+  const b = auftrag().bloecke.find(x => x.key === key);
+  modal(`
+    <h2>Stunden erfassen · ${esc(b.name)}</h2>
+    <div class="field"><label for="e_p">Position</label>
+      <select id="e_p"><option value="">Ganzer Block</option>
+        ${b.positionen.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}
+      </select></div>
+    <div class="grid-2">
+      <div class="field"><label for="e_d">Ausführungsdatum</label><input id="e_d" type="date" value="${today()}"></div>
+      <div class="field"><label for="e_h">Stunden benötigt</label><input id="e_h" type="number" step="0.25"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="e_ent" checked> Ausführung im Auftrag enthalten</label>
+    <label class="check"><input type="checkbox" id="e_gen"> Rapport durch Bauleitung genehmigt</label>
+    <div class="field"><label for="e_bem">Welche Arbeiten wurden ausgeführt?</label><textarea id="e_bem"></textarea></div>
+    <div class="row"><button class="btn primary-action" onclick="erfassenSpeichern('${key}')">Rapport speichern</button>
+      <button class="btn" onclick="modalZu()">Abbrechen</button></div>`);
+}
+
+function erfassenSpeichern(key){
+  const b = auftrag().bloecke.find(x => x.key === (key || ui.tab));
+  const st = num(document.getElementById('e_h').value);
+  if(st <= 0){ alert('Bitte die geleisteten Stunden eingeben.'); return; }
+  b.ausfuehrungen.push({
+    id:uid(),
+    posId: document.getElementById('e_p').value || null,
+    datum: document.getElementById('e_d').value,
+    stunden: st,
+    enthalten: document.getElementById('e_ent').checked,
+    genehmigt: document.getElementById('e_gen').checked,
+    bemerkung: document.getElementById('e_bem').value.trim()
+  });
+  save();
+  if(key){ modalZu(); render(); }
+  else { render(); const m = document.getElementById('e_msg'); if(m) m.innerHTML = '<span class="tag pos">Gespeichert</span>'; }
+}
+
+function ausLoeschen(key,aid){
+  const b = auftrag().bloecke.find(x => x.key === key);
+  b.ausfuehrungen = b.ausfuehrungen.filter(x => x.id !== aid);
+  save(); render();
+}
+
+/* ---------- Sichern und Laden ---------- */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const u = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = u; a.download = 'auftragsbewertung_' + today() + '.json'; a.click();
+  URL.revokeObjectURL(u);
+}
+function importJSON(input){
+  const f = input.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { try{ const d = JSON.parse(r.result); if(!d.auftraege) throw 0;
+    state = d; ui.auftragId = state.auftraege[0]?.id || null; save(); render();
+  }catch(e){ alert('Die Datei konnte nicht gelesen werden.'); } };
+  r.readAsText(f);
+}
+function zuruecksetzen(){
+  if(!confirm('Alle Eingaben verwerfen und den Startbestand laden?')) return;
+  state = seed(); ui.auftragId = state.auftraege[0].id; save(); render();
+}
+
+/* ---------- Steuerung ---------- */
+function go(v){ ui.view = v; window.scrollTo(0,0); render(); }
+function oeffne(id){ ui.auftragId = id; ui.view = 'auftrag'; ui.tab = 'bau'; window.scrollTo(0,0); render(); }
+
+function render(){
+  renderSidebar();
+  const v = { portfolio:viewPortfolio, auftrag:viewAuftrag, erfassung:viewErfassung,
+              bericht:viewBericht, einstellungen:viewEinstellungen }[ui.view] || viewPortfolio;
+  document.getElementById('view').innerHTML = v();
+}
+
+render();
+</script>
+</body>
+</html>
